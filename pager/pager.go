@@ -9,7 +9,7 @@ import (
 	"golang.org/x/term"
 )
 
-var pagerCmdDflts = []string{"less", "more"}
+var pagerCmdDflts = []string{"less", "more"} //nolint: gofumpt
 var cmdSplit = regexp.MustCompile(`\s+`)
 
 type Pager struct {
