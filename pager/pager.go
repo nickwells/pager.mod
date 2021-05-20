@@ -49,9 +49,9 @@ func isWriterATerminal(w io.Writer) bool {
 // will start a pager command and connect the terminal writers to the input
 // of the pager command. It returns the pager which should have Done() called
 // on it after any output is complete.
-func Start(sw SetWriter) *Pager {
-	outIsTty := isWriterATerminal(sw.StdWriter())
-	errIsTty := isWriterATerminal(sw.ErrWriter())
+func Start(sw SetW) *Pager {
+	outIsTty := isWriterATerminal(sw.StdW())
+	errIsTty := isWriterATerminal(sw.ErrW())
 
 	if !outIsTty && !errIsTty {
 		return nil
@@ -66,18 +66,18 @@ func Start(sw SetWriter) *Pager {
 		return nil
 	}
 
-	cmd.Stdout = sw.StdWriter()
-	cmd.Stderr = sw.ErrWriter()
+	cmd.Stdout = sw.StdW()
+	cmd.Stderr = sw.ErrW()
 	err = cmd.Start()
 	if err != nil {
 		return nil
 	}
 
 	if outIsTty {
-		sw.SetStdWriter(pagerIn)
+		sw.SetStdW(pagerIn)
 	}
 	if errIsTty {
-		sw.SetErrWriter(pagerIn)
+		sw.SetErrW(pagerIn)
 	}
 
 	return &Pager{
