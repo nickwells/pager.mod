@@ -26,6 +26,7 @@ func getPagerCmd() *exec.Cmd {
 
 	for _, tp := range trialPagers {
 		parts := cmdSplit.Split(tp, -1)
+
 		path, err := exec.LookPath(parts[0])
 		if err == nil {
 			return exec.Command(path, parts[1:]...)
@@ -42,6 +43,7 @@ func isWriterATerminal(w io.Writer) bool {
 			return true
 		}
 	}
+
 	return false
 }
 
@@ -56,6 +58,7 @@ func Start(sw SetW) *Pager {
 	if !outIsTty && !errIsTty {
 		return nil
 	}
+
 	cmd := getPagerCmd()
 	if cmd == nil {
 		return nil
@@ -68,6 +71,7 @@ func Start(sw SetW) *Pager {
 
 	cmd.Stdout = sw.StdW()
 	cmd.Stderr = sw.ErrW()
+
 	err = cmd.Start()
 	if err != nil {
 		return nil
@@ -76,6 +80,7 @@ func Start(sw SetW) *Pager {
 	if outIsTty {
 		sw.SetStdW(pagerIn)
 	}
+
 	if errIsTty {
 		sw.SetErrW(pagerIn)
 	}
