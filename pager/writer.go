@@ -5,7 +5,8 @@ import (
 	"os"
 )
 
-// SetW
+// SetW is the interface to be satisfied which both sets the standard out and
+// standard error writers and returns them.
 type SetW interface {
 	SetStdW(io.Writer)
 	SetErrW(io.Writer)

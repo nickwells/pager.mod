@@ -12,6 +12,8 @@ import (
 var pagerCmdDflts = []string{"less", "more"} //nolint: gofumpt
 var cmdSplit = regexp.MustCompile(`\s+`)
 
+// Pager represents the input to be paged and the command to be used to
+// perform the paging.
 type Pager struct {
 	pagerIn io.WriteCloser
 	cmd     *exec.Cmd
