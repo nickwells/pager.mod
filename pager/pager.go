@@ -9,7 +9,6 @@ import (
 	"golang.org/x/term"
 )
 
-var pagerCmdDflts = []string{"less", "more"} //nolint: gofumpt
 var cmdSplit = regexp.MustCompile(`\s+`)
 
 // Pager represents the input to be paged and the command to be used to
@@ -19,19 +18,29 @@ type Pager struct {
 	cmd     *exec.Cmd
 }
 
-// getPagerCmd returns the pager command or nil if no executable command can
-// be found. It will first try the contents of the PAGER environment variable
-// and then the list of pager command defaults.
-func getPagerCmd() *exec.Cmd {
-	trialPagers := []string{os.Getenv("PAGER")}
-	trialPagers = append(trialPagers, pagerCmdDflts...)
+// getTrialPagers returns a list of Pagers to be searched for. The first
+// entry will be the value of the PAGER environment variable and the rest
+// will be the default pagers: "less" and "more".
+func getTrialPagers() []string {
+	trialPagers := []string{}
 
-	for _, tp := range trialPagers {
+	envPager := os.Getenv("PAGER")
+	if envPager != "" {
+		trialPagers = append(trialPagers, envPager)
+	}
+
+	return append(trialPagers, "less", "more")
+}
+
+// getPagerCmd returns the pager command or nil if no executable command can
+// be found.
+func getPagerCmd() *exec.Cmd {
+	for _, tp := range getTrialPagers() {
 		parts := cmdSplit.Split(tp, -1)
 
 		path, err := exec.LookPath(parts[0])
 		if err == nil {
-			return exec.Command(path, parts[1:]...)
+			return exec.Command(path, parts[1:]...) //nolint:gosec
 		}
 	}
 
