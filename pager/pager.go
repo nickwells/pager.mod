@@ -18,6 +18,8 @@ type Pager struct {
 	cmd     *exec.Cmd
 }
 
+var dfltPagers = []string{"less", "more"}
+
 // getTrialPagers returns a list of Pagers to be searched for. The first
 // entry will be the value of the PAGER environment variable and the rest
 // will be the default pagers: "less" and "more".
@@ -29,7 +31,7 @@ func getTrialPagers() []string {
 		trialPagers = append(trialPagers, envPager)
 	}
 
-	return append(trialPagers, "less", "more")
+	return append(trialPagers, dfltPagers...)
 }
 
 // getPagerCmd returns the pager command or nil if no executable command can
@@ -63,10 +65,10 @@ func isWriterATerminal(w io.Writer) bool {
 // of the pager command. It returns the pager which should have Done() called
 // on it after any output is complete.
 func Start(sw SetW) *Pager {
-	outIsTty := isWriterATerminal(sw.StdW())
-	errIsTty := isWriterATerminal(sw.ErrW())
+	stdoutIsTty := isWriterATerminal(sw.StdW())
+	stderrIsTty := isWriterATerminal(sw.ErrW())
 
-	if !outIsTty && !errIsTty {
+	if !stdoutIsTty && !stderrIsTty {
 		return nil
 	}
 
@@ -88,11 +90,11 @@ func Start(sw SetW) *Pager {
 		return nil
 	}
 
-	if outIsTty {
+	if stdoutIsTty {
 		sw.SetStdW(pagerIn)
 	}
 
-	if errIsTty {
+	if stderrIsTty {
 		sw.SetErrW(pagerIn)
 	}
 
@@ -110,5 +112,6 @@ func (p *Pager) Done() {
 	}
 
 	p.pagerIn.Close()
+
 	_ = p.cmd.Wait()
 }
