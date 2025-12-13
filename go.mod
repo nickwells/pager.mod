@@ -1,13 +1,13 @@
 module github.com/nickwells/pager.mod
 
-go 1.24
+go 1.24.0
 
 require (
-	github.com/nickwells/testhelper.mod/v2 v2.4.2
-	golang.org/x/term v0.32.0
+	github.com/nickwells/testhelper.mod/v2 v2.4.3
+	golang.org/x/term v0.38.0
 )
 
 require (
-	golang.org/x/exp v0.0.0-20250620022241-b7579e27df2b // indirect
-	golang.org/x/sys v0.33.0 // indirect
+	golang.org/x/exp v0.0.0-20251209150349-8475f28825e9 // indirect
+	golang.org/x/sys v0.39.0 // indirect
 )
