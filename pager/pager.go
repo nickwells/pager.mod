@@ -52,7 +52,7 @@ func getPagerCmd() *exec.Cmd {
 // isWriterATerminal returns true if the io.Writer is a Terminal
 func isWriterATerminal(w io.Writer) bool {
 	if outFile, ok := w.(*os.File); ok {
-		if term.IsTerminal(int(outFile.Fd())) {
+		if term.IsTerminal(int(outFile.Fd())) { //nolint:gosec
 			return true
 		}
 	}
