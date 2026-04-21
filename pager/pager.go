@@ -23,12 +23,16 @@ var dfltPagers = []string{"less", "more"}
 // getTrialPagers returns a list of Pagers to be searched for. The first
 // entry will be the value of the PAGER environment variable and the rest
 // will be the default pagers: "less" and "more".
-func getTrialPagers() []string {
+func getTrialPagers(envVarNames []string) []string {
 	trialPagers := []string{}
 
-	envPager := os.Getenv("PAGER")
-	if envPager != "" {
-		trialPagers = append(trialPagers, envPager)
+	envVarNames = append(envVarNames, "PAGER")
+
+	for _, envVar := range envVarNames {
+		envPager := os.Getenv(envVar)
+		if envPager != "" {
+			trialPagers = append(trialPagers, envPager)
+		}
 	}
 
 	return append(trialPagers, dfltPagers...)
@@ -36,8 +40,8 @@ func getTrialPagers() []string {
 
 // getPagerCmd returns the pager command or nil if no executable command can
 // be found.
-func getPagerCmd() *exec.Cmd {
-	for _, tp := range getTrialPagers() {
+func getPagerCmd(envVarNames []string) *exec.Cmd {
+	for _, tp := range getTrialPagers(envVarNames) {
 		parts := cmdSplit.Split(tp, -1)
 
 		path, err := exec.LookPath(parts[0])
@@ -64,7 +68,17 @@ func isWriterATerminal(w io.Writer) bool {
 // will start a pager command and connect the terminal writers to the input
 // of the pager command. It returns the pager which should have Done() called
 // on it after any output is complete.
+//
+// The pager command is chosen from the contents of the PAGER environment
+// variable or the commands 'less' or 'more' if that cannot be used.
 func Start(sw SetW) *Pager {
+	return StartWithEnvVars(sw)
+}
+
+// StartWithEnvVars behaves like [Start] but the supplied environment
+// variable names are checked first for an executable pager in addition to
+// those checked by Start.
+func StartWithEnvVars(sw SetW, envVarNames ...string) *Pager {
 	stdoutIsTty := isWriterATerminal(sw.StdW())
 	stderrIsTty := isWriterATerminal(sw.ErrW())
 
@@ -72,7 +86,7 @@ func Start(sw SetW) *Pager {
 		return nil
 	}
 
-	cmd := getPagerCmd()
+	cmd := getPagerCmd(envVarNames)
 	if cmd == nil {
 		return nil
 	}

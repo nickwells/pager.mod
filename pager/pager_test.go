@@ -9,33 +9,65 @@ import (
 )
 
 func TestGetTrialPagers(t *testing.T) {
-	const pagerCmd = "somePager -x -y"
+	const (
+		pagerCmd1 = "somePager -x -y"
+		pagerCmd2 = "otherPager -x -y"
+	)
 
-	var ec testhelper.EnvCache
-
-	envWithoutPager := testhelper.EnvEntry{Key: "PAGER"}
-	if err := (&ec).Setenv(envWithoutPager); err != nil {
-		t.Fatal("couldn't set the 'PAGER' environment variable:", err)
-		return
+	testCases := []struct {
+		testhelper.ID
+		envVarNames []string
+		envVals     []testhelper.EnvEntry
+		expPagers   []string
+	}{
+		{
+			ID: testhelper.MkID("no-env"),
+		},
+		{
+			ID: testhelper.MkID("PAGER"),
+			envVals: []testhelper.EnvEntry{
+				{Key: "PAGER", Value: pagerCmd1},
+			},
+			expPagers: []string{pagerCmd1},
+		},
+		{
+			ID:          testhelper.MkID("Other"),
+			envVarNames: []string{"Other"},
+			envVals: []testhelper.EnvEntry{
+				{Key: "Other", Value: pagerCmd2},
+			},
+			expPagers: []string{pagerCmd2},
+		},
+		{
+			ID:          testhelper.MkID("both"),
+			envVarNames: []string{"Other"},
+			envVals: []testhelper.EnvEntry{
+				{Key: "PAGER", Value: pagerCmd1},
+				{Key: "Other", Value: pagerCmd2},
+			},
+			expPagers: []string{pagerCmd2, pagerCmd1},
+		},
 	}
 
-	pagers := getTrialPagers()
-	testhelper.DiffStringSlice(t, "with empty PAGER", "trial pagers",
-		pagers, dfltPagers)
+	for _, tc := range testCases {
+		t.Run(tc.Name, func(t *testing.T) {
+			var ec testhelper.EnvCache
 
-	(&ec).ResetEnv()
+			if err := (&ec).Setenv(tc.envVals...); err != nil {
+				t.Fatal("couldn't set the environment variables:", err)
+				return
+			}
 
-	envWithPager := testhelper.EnvEntry{Key: "PAGER", Value: pagerCmd}
-	if err := (&ec).Setenv(envWithPager); err != nil {
-		t.Fatal("couldn't set the 'PAGER' environment variable:", err)
-		return
+			pagers := getTrialPagers(tc.envVarNames)
+			expPagers := tc.expPagers
+			expPagers = append(expPagers, dfltPagers...)
+			testhelper.DiffStringSlice(t,
+				tc.IDStr(), "trial pagers list",
+				pagers, expPagers)
+
+			(&ec).ResetEnv()
+		})
 	}
-
-	pagers = getTrialPagers()
-	expPagers := []string{pagerCmd}
-	expPagers = append(expPagers, dfltPagers...)
-	testhelper.DiffStringSlice(t, "with PAGER='"+pagerCmd+"'", "trial pagers",
-		pagers, expPagers)
 }
 
 func TestIsWriterATerminal(t *testing.T) {
