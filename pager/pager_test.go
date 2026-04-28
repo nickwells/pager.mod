@@ -53,6 +53,13 @@ func TestGetTrialPagers(t *testing.T) {
 		t.Run(tc.Name, func(t *testing.T) {
 			var ec testhelper.EnvCache
 
+			if err := (&ec).Setenv(
+				testhelper.EnvEntry{Key: "PAGER", Value: ""},
+			); err != nil {
+				t.Fatal("couldn't clear the PAGER environment variable:", err)
+				return
+			}
+
 			if err := (&ec).Setenv(tc.envVals...); err != nil {
 				t.Fatal("couldn't set the environment variables:", err)
 				return
