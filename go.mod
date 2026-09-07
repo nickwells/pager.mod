@@ -3,7 +3,7 @@ module github.com/nickwells/pager.mod
 go 1.27.0
 
 require (
-	github.com/nickwells/testhelper.mod/v2 v2.6.2
+	github.com/nickwells/testhelper.mod/v2 v2.6.4
 	golang.org/x/term v0.45.0
 )
 
